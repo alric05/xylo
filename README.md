@@ -71,6 +71,7 @@ You can install Xylo using Cargo:
 ```sh
 cargo install xylo-lang
 ```
+This will install a binary named `xylo-lang`.
 
 ### Manual Build (Linux)
 
@@ -99,7 +100,7 @@ Write some Xylo code in a `.xylo` file e.g. `art.xylo`.
 Then, generate an image from that code:
 
 ```sh
-xylo generate art.xylo --width 800 --height 800
+xylo-lang generate art.xylo --width 800 --height 800
 ```
 
 If your code is valid, you should see an image output to `art.png`.
