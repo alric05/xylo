@@ -35,9 +35,30 @@ impl Default for Config {
 }
 
 pub fn generate_pixmap(input: &str, config: Config) -> Result<Pixmap> {
-    let tree = parse(input)?;
-    let shape = execute(tree, config.seed)?;
-    Ok(render(shape, config.dimensions.0, config.dimensions.1)?)
+    #[cfg(feature = "std")]
+    {
+        // Parsing retains string references, so perform all heavy work inside a
+        // new thread with an increased stack size to avoid stack overflows when
+        // executing deeply recursive code.
+        let input = input.to_owned();
+        std::thread::Builder::new()
+            .stack_size(32 * 1024 * 1024)
+            .spawn(move || {
+                let tree = parse(&input)?;
+                let shape = execute(tree, config.seed)?;
+                render(shape, config.dimensions.0, config.dimensions.1)
+            })
+            .unwrap()
+            .join()
+            .unwrap()
+    }
+
+    #[cfg(not(feature = "std"))]
+    {
+        let tree = parse(input)?;
+        let shape = execute(tree, config.seed)?;
+        render(shape, config.dimensions.0, config.dimensions.1)
+    }
 }
 
 pub fn generate_png_data(input: &str, config: Config) -> Result<Vec<u8>> {
